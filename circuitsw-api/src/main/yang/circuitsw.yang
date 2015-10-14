@@ -1,0 +1,9 @@
+module circuitsw {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:circuitsw";
+    prefix "circuitsw";
+
+    revision "2015-10-13" {
+        description "Initial revision of circuitsw model";
+    }
+}
