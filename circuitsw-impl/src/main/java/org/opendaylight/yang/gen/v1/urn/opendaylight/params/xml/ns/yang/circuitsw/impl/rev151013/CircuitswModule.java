@@ -1,4 +1,7 @@
 package org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.circuitsw.impl.rev151013;
+
+import org.opendaylight.ofextensions.circuitsw.impl.CircuitswProvider;
+
 public class CircuitswModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.circuitsw.impl.rev151013.AbstractCircuitswModule {
     public CircuitswModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
@@ -15,8 +18,9 @@ public class CircuitswModule extends org.opendaylight.yang.gen.v1.urn.opendaylig
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        // TODO:implement
-        throw new java.lang.UnsupportedOperationException();
+        CircuitswProvider csProvider = new CircuitswProvider();
+        return csProvider;
+        //throw new java.lang.UnsupportedOperationException();
     }
 
 }

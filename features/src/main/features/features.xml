@@ -13,22 +13,22 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
-  <feature name='odl-circuitsw-api' version='${project.version}' description='OpenDaylight :: circuitsw :: api'>
+  <feature name='odl-circuitsw-switch-api' version='${project.version}' description='OpenDaylight :: circuitsw :: api'>
     <feature version='${yangtools.version}'>odl-yangtools-models</feature>
     <bundle>mvn:org.opendaylight.ofextensions.circuitsw/circuitsw-api/${project.version}</bundle>
   </feature>
-  <feature name='odl-circuitsw' version='${project.version}' description='OpenDaylight :: circuitsw'>
+  <feature name='odl-circuitsw-switch' version='${project.version}' description='OpenDaylight :: circuitsw'>
     <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-    <feature version='${project.version}'>odl-circuitsw-api</feature>
+    <feature version='${project.version}'>odl-circuitsw-switch-api</feature>
     <bundle>mvn:org.opendaylight.ofextensions.circuitsw/circuitsw-impl/${project.version}</bundle>
     <configfile finalname="${configfile.directory}/circuitsw.xml">mvn:org.opendaylight.ofextensions.circuitsw/circuitsw-impl/${project.version}/xml/config</configfile>
   </feature>
-  <feature name='odl-circuitsw-rest' version='${project.version}' description='OpenDaylight :: circuitsw :: REST'>
-    <feature version="${project.version}">odl-circuitsw</feature>
+  <feature name='odl-circuitsw-switch-rest' version='${project.version}' description='OpenDaylight :: circuitsw :: REST'>
+    <feature version="${project.version}">odl-circuitsw-switch</feature>
     <feature version="${mdsal.version}">odl-restconf</feature>
   </feature>
-  <feature name='odl-circuitsw-ui' version='${project.version}' description='OpenDaylight :: circuitsw :: UI'>
-    <feature version="${project.version}">odl-circuitsw-rest</feature>
+  <feature name='odl-circuitsw-switch-ui' version='${project.version}' description='OpenDaylight :: circuitsw :: UI'>
+    <feature version="${project.version}">odl-circuitsw-switch-rest</feature>
     <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
   </feature>
