@@ -1,0 +1,267 @@
+module circuitsw-port-info{
+    yang-version 1;
+    namespace "urn:opendaylight:calientapp:circuitswportinfo";
+    prefix circuitswportinfo;
+
+    import opendaylight-inventory { prefix inv; revision-date
+        "2013-08-19";}
+    import yang-ext {prefix ext; revision-date "2013-07-09";}
+    import flow-capable-transaction {prefix tr; revision-date
+        "2015-03-04";}
+
+    revision "2015-10-13" {
+        description "Initial revision of circuitsw model";
+    }
+
+    typedef circuitsw-port-admin {
+        description
+                "Enum to indicate behavior of the calient optical port. These
+                describe the current configuration and used port_mod message to
+                configure the port's behavior.Administrative State reflects the operator's 
+        	    intention for the entity (how is it configured.)";
+            type enumeration {
+            enum in-service {
+                description "Enabled to provide service";
+                value 0;
+            }
+            enum out-of-service {
+                description "Not enabled to provide service";
+                value 1;
+            }
+            enum oos-np {
+                description "Not yet added to system by operator.";                
+                value 2;
+            }
+            enum UnderManagement{
+                description "Configured to provide service, but suspended for maintanance.";
+                value 3;            	
+            }
+            enum Ready {
+                description "awaiting activation, IS but not monitored";
+                value 4;
+            }
+        }
+    }
+
+    typedef circuitsw-port-oper {
+        description
+                "Operational State reflects what
+        	     the entity is doing";
+        type enumeration {
+            enum in-service {
+            	description "Functioning normally & providing service.";
+            	value 0;
+            }
+            enum out-of-service {
+            	description " Not providing service.";
+                value 1;
+            }
+            enum Initializing {
+                description "Initializing.";
+                value 2;
+            }
+            enum Ready {
+                description "awaiting activation.";
+                value 3;
+            }
+            enum Degraded {
+                description "component failure causing reduced level of support";
+                value 4;
+            }
+            enum Diagnostics {
+                description "performing diagnostics";
+                value 5;
+            }
+        }
+    }
+
+    typedef circuitsw-port-oper-capability {
+        description
+                "Capability State reflects the actual state of the hardware";
+        type enumeration {
+        	enum NoHardware {
+                description " Slot is empty.";
+                value 0;
+            }
+            enum Ok {
+                description "Everything is OK";
+                value 1;
+            }
+            enum Degraded {
+                description " Working, but something is wrong";
+                value  2;
+            }
+            enum Failed {
+                description "Not working";
+                value  3;
+            }
+            enum Initializing {
+                description "Initializing.";
+                value  4;
+            }
+            enum  Diagnostics {
+                description "performing diagnostics";
+                value   5;
+            }
+            enum Synchronizing {
+                description  "Synchronizing";
+                value    6;
+            }
+        }
+    }
+
+    typedef circuitsw-port-alarm {
+        description
+                "calient openflow alarm";
+        type enumeration {
+            enum Unknown {
+                description " level is not relevant, or s/w bug";
+                value 0;
+            }
+            enum clear {
+                description " No alarms active";
+                value 1;
+            }
+            enum minor {
+                description " only minor alarm(s) active";
+                value  2;
+            }
+            enum major {
+                description "major alarm(s) active";
+                value 3;
+            }
+            enum critical {
+                description "critical alarm(s) active";
+                value 4;
+            }
+        }
+    }
+    
+    grouping port-info{    	
+    	leaf admin-status {
+            type circuitsw-port-admin;
+        }
+    	
+        leaf oper-status {
+            type circuitsw-port-oper;
+        }
+        
+        leaf oper-capability
+        {
+            type circuitsw-port-oper-capability;
+        }
+        
+        leaf port-power
+        {
+            type string;
+        }
+        
+        leaf peer-node
+        {
+            type uint64;
+        }
+        
+        leaf peer-port
+        {
+            type uint16;
+        }
+        
+        leaf circuit-id
+        {
+            type string;
+        }
+        
+        leaf alias
+        {
+            type string;
+        }
+        
+        leaf alarm{
+            type circuitsw-port-alarm;
+        }
+    }
+    
+    
+    grouping circuitsw-port-info-grouping
+    {
+    	leaf port-length {
+            type uint16;
+        }
+        leaf port-no {
+            type uint32;
+        }
+        
+        leaf hw_addr{
+            type string;	
+        }
+        
+        leaf port-name{
+        	type string;
+        }
+                
+        leaf config {
+            type uint32;
+        }
+         
+        leaf state{
+        	type uint32;
+        }   	
+        
+        container in-port{uses port-info;}
+        container out-port{uses port-info;}
+    }
+    
+    
+    
+    grouping flow-capable-circuitsw-node-connector-info {
+        container flow-capable-circuitsw-node-connector-info {
+            uses circuitsw-port-info-grouping;
+        }
+     }
+    
+    augment /inv:nodes/inv:node/inv:node-connector {
+        ext:augment-identifier "circuitsw-node-connector-info-data";
+        uses flow-capable-circuitsw-node-connector-info;
+    }
+    
+    grouping circuitsw-node-connector-info-and-port-number-map {
+    	description "List of map - node connectors and their statistics";
+    	list circuitsw-node-connector-info-and-port-number-map {
+    		key "node-connector-id";
+    		leaf node-connector-id {
+    			type inv:node-connector-id;
+    		}
+    		uses circuitsw-port-info-grouping;
+    	}
+    }
+
+    rpc get-all-circuitsw-node-connector-stats {
+    	description "Sending port stats request to openflow device.";
+    	input {
+    		uses inv:node-context-ref;
+    	}
+    	output {
+    		uses circuitsw-port-info-grouping;
+            uses tr:transaction-aware;
+    	}
+    }
+
+    rpc get-all-circuitsw-node-connector-desc-stats {
+    	description "Sending port desc stats request to openflow device.";
+    	input {
+    		uses inv:node-context-ref;
+    	}
+    	output {
+    		uses circuitsw-port-info-grouping;
+            uses tr:transaction-aware;
+    	}
+    }
+    
+    
+    notification circuitsw-node-connector-stats-update {
+    	uses inv:node;
+    	uses circuitsw-node-connector-info-and-port-number-map;
+    	uses tr:multipart-transaction-aware;
+    }
+
+}
