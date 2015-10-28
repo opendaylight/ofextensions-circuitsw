@@ -1,0 +1,242 @@
+module circuitsw-flow-stats {
+    yang-version 1;
+    namespace "urn:opendaylight:calientapp:circuitswflowstats";
+    prefix circuitswflowstats;
+
+    import yang-ext { prefix ext; revision-date "2013-07-09"; }
+    import opendaylight-inventory { prefix inv; revision-date "2013-08-19"; }
+    import opendaylight-match-types { prefix match; revision-date "2013-10-26"; }
+    import opendaylight-flow-types {prefix flow-types;revision-date "2013-10-26";}
+    import ietf-inet-types { prefix inet; revision-date "2010-09-24"; }
+    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    
+    import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
+    import flow-capable-transaction { prefix tr; }
+
+    revision "2015-06-24" {
+        description "Initial revision of circuitswflowstats model";
+    }
+    
+    typedef circuitsw-flow-mod-flags {
+        type bits {
+            bit CHECK_OVERLAP;
+            bit RESET_COUNTS;
+            bit NO_PKT_COUNTS;
+            bit NO_BYT_COUNTS;
+            bit SEND_FLOW_REM;
+        }
+    }
+
+    typedef circuitsw_flow_admin {
+        description "calient flow admin state";
+        type enumeration {
+            enum InService {
+                description " Enabled to provide service.";
+                value 0;
+            }
+            enum OutOfService {
+                description "Not enabled to provide service.";
+                value 1;
+            }
+            enum oosnp {
+                description "Not yet  added to system by operator.";
+                value 2;
+            }
+            enum UnderManagerment {
+                description "Configured to provide service, but suspended for maintanance.";
+                value 3;
+            }
+            enum Ready {
+                description "awaiting activation, IS but not monitored";
+                value 4;
+            }
+        }
+    }
+
+    typedef circuitsw_flow_operational {
+        description
+                "calient flow operational state";
+        type enumeration {
+            enum InService {
+                description "Functioning normally & providing service.";
+                value 0;
+            }
+            enum OutOfService {
+                description " Not providing service.";
+                value 1;
+            }
+            enum Initializing {
+                description "Initializing.";
+                value 2;
+            }
+            enum Ready {
+                description "awaiting activation.";
+                value 3;
+            }
+            enum Degraded {
+                description "component failure causing reduced level of support";
+                value 4;
+            }
+            enum Diagnostics {
+                description "performing diagnostics";
+                value 5;
+            }
+        }
+    }
+
+    typedef circuitsw_flow_Capability {
+        description
+                "calient flow operational capability";
+        type enumeration {
+            enum NoHardware {
+                description " Slot is empty.";
+                value 0;
+            }
+            enum Ok {
+                description "Everything is OK";
+                value 1;
+            }
+            enum Degraded {
+                description " Working, but something is wrong";
+                value  2;
+            }
+
+            enum Failed {
+                description "Not working";
+                value  3;
+            }
+            enum Initializing {
+                description "Initializing.";
+                value  4;
+            }
+            enum  Diagnostics {
+                description "performing diagnostics";
+                value   5;
+            }
+            enum Synchronizing {
+                description  "Synchronizing";
+                value    6;
+            }
+        }
+    }
+
+    typedef circuitsw_flow_alarm {
+        description "calient flow alarm";
+        type enumeration {
+            enum Unknown {
+                description " level is not relevant, or s/w bug";
+                value 0;
+            }
+            enum clear {
+                description " No alarms active";
+                value 1;
+            }
+            enum minor {
+                description " only minor alarm(s) active";
+                value  2;
+            }
+            enum major {
+                description "major alarm(s) active";
+                value 3;
+            }
+            enum critical {
+                description "critical alarm(s) active";
+                value 4;
+            }
+        }
+    }
+
+
+    typedef flow-id {
+        description "flow id";
+        type inet:uri;
+    }
+
+    grouping duration {
+        container flow-duration {
+            leaf second {
+                type yang:counter32;
+            }
+            leaf nanosecond {
+                type yang:counter32;
+            }
+        }
+    }
+
+    grouping circuitsw-flow-stats{
+        description "circuitsw switch flow description";        
+        leaf admin-status {
+            type circuitsw_flow_admin;
+        }
+        leaf oper-status {
+            type circuitsw_flow_operational;
+        }
+        leaf oper-capability {
+            type circuitsw_flow_Capability;
+        }
+        leaf alarm {
+            type circuitsw_flow_alarm;
+        }
+        leaf port-power {
+            type string;
+        }
+        leaf connected-port-power {
+            type string;
+        }
+        leaf cflow_name {
+            type string;
+        }
+        uses duration;
+    }
+
+    grouping flow-capable-circuitsw-flow-stats{
+        container flow-capable-circuitsw-flow-stats{
+            //config "false";
+            uses circuitsw-flow-stats;
+        }
+    }
+
+    //Augment flow statistics data to the flow-capable-node->table->flow
+    augment "/inv:nodes/inv:node/flow-node:table/flow-node:flow" {
+        ext:augment-identifier "circuitsw-flow-stats-data";
+        uses flow-capable-circuitsw-flow-stats;
+    }
+
+    grouping  circuitsw-flow-and-stats-map-list {
+        description "List of flow and stats map";
+        list circuitsw-flow-and-stats-map-list{
+            key "flow-id";
+            leaf flow-id {
+                type flow-id;
+            }
+            uses circuitsw-flow-and-stats-map;
+        }
+    }
+
+    grouping circuitsw-flow-and-stats-map{
+        description "Mapping between flow and its statistics";
+        uses flow-types:flow;
+        uses circuitsw-flow-stats;
+    }
+
+    // RPC calls to fetch flow statistics
+    rpc get-all-circuitsw-flows-stats {
+        description "Fetch statistics of all the flow present in all the flow tables of the circuitsw";
+        input {
+            uses inv:node-context-ref;
+        }
+        output {
+            uses circuitsw-flow-and-stats-map-list;
+            uses tr:transaction-aware;
+        }
+
+    }
+    
+    notification circuitsw-flow-stats-update {
+        description "Flows stats sent by switch";
+        uses inv:node;        
+        uses circuitsw-flow-and-stats-map-list;
+        uses tr:multipart-transaction-aware;
+    }
+
+}
