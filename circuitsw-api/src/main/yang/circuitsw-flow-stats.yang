@@ -7,8 +7,8 @@ module circuitsw-flow-stats {
     import opendaylight-inventory { prefix inv; revision-date "2013-08-19"; }
     import opendaylight-match-types { prefix match; revision-date "2013-10-26"; }
     import opendaylight-flow-types {prefix flow-types;revision-date "2013-10-26";}
-    import ietf-inet-types { prefix inet; revision-date "2010-09-24"; }
-    import ietf-yang-types {prefix yang; revision-date "2010-09-24";}
+    import ietf-inet-types { prefix inet; revision-date "2013-07-15"; }
+    import ietf-yang-types {prefix yang; revision-date "2013-07-15";}
     
     import flow-node-inventory {prefix flow-node;revision-date "2013-08-19";}
     import flow-capable-transaction { prefix tr; }
